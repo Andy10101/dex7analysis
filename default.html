@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>d3 </title>
+	<script src='http://d3js.org/d3.v2.js'></script>
+	<script>
+		"use strict";
+
+	function draw(data){
+
+		console.log(data);
+
+		d3.select("body")
+		.append("ul")
+		.selectAll("li")
+		.data(data)
+		.enter()
+		.append("li")
+		.text( function(d) {
+			return d.hourOfDay + " : " + d.mg_dl;
+		});
+
+	}
+
+
+	</script>
+</head>
+<body>
+	<script>
+		d3.json("./d3.json",draw);
+	</script>
+</body>
+</html>
