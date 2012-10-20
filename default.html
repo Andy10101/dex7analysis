@@ -22,6 +22,20 @@
 		.attr("class","bar")
 		.style("width", function(d){ return d.mg_dl + "px"})
 		.style("outline","1px solid black")
+		.style("background-color", function(d){
+			if(d.mg_dl > 200)
+			{
+				return "#ff0000";
+			}
+
+			if(d.mg_dl < 80)
+			{
+				return "#ffff00";
+			}
+			
+			return "#ffffff";
+			
+		})
 		.text( function(d){ return Math.round(d.mg_dl)});
 
 
