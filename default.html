@@ -23,17 +23,27 @@
 		.style("width", function(d){ return d.mg_dl + "px"})
 		.style("outline","1px solid black")
 		.style("background-color", function(d){
-			if(d.mg_dl > 200)
+			
+
+
+			if(d.mg_dl > 300)
 			{
-				return "#ff0000";
+				//high
+				return "#ff3300";
+			}
+			if(d.mg_dl > 250)
+			{
+				//moderately high
+				return "#ff9933";
 			}
 
 			if(d.mg_dl < 80)
 			{
-				return "#ffff00";
+				//low
+				return "#ffff66";
 			}
 			
-			return "#ffffff";
+			return "#ccff99";
 			
 		})
 		.text( function(d){ return Math.round(d.mg_dl)});
