@@ -140,7 +140,7 @@ def getDataFrame(inputXML = "./cgm.xml"):
 	return df
 
 
-def saveD3json(numRecords = 8,outputJSON = './d3.json',inputXML = "./cgm.xml"):
+def saveD3json(numRecords = 8,inputXML = "./cgm.xml",outputJSON = './d3.json'):
 	a,itemz = outCsv( inputXML)
 	sub = itemz[0:numRecords]
 	data, d3data = prepForPanda(sub)
