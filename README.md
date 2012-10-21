@@ -18,4 +18,4 @@ saveD3json(90,"<<path to dexecom export.xml>>")
 
 In same dir run tmp webserver and see results at
 bash-3.2$ python -m SimpleHTTPServer 8001
-browser: http://localhost:8001/default.html
+browser: http://localhost:8001/index.html

@@ -114,7 +114,7 @@ def prepForPanda(items):
 			hold[subItemIndex].append( subItem )
 			
 			idx = headerLine[subItemIndex]
-			tmpD3[idx]  = [subItem]
+			tmpD3[idx]  = subItem
 			subItemIndex = subItemIndex + 1
 
 		d3.append(tmpD3)
