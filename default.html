@@ -2,6 +2,27 @@
 <html>
 <head>
 	<title>experiments with d3 </title>
+	<style type="text/css">
+
+	div.chart{ 
+		font-family:sans-serif; 
+		font-size: 0.3em; 
+	}
+
+	div.bar {
+		 
+		 color:#e0e0e0;
+		 height: 2em; 
+		 line-height: 3em; 
+		 padding-right: 1em; 
+		 margin-bottom: 2px; 
+		 text-align:right; 
+		 outline:1px solid black
+	}
+
+
+	</style>
+
 	<script src='http://d3js.org/d3.v2.js'></script>
 	<script>
 		"use strict";
@@ -9,7 +30,6 @@
 	function draw(data){
 
 		console.log(data);
-
 
 		//basic histogram with resiable divs ...
 		d3.select("body")
@@ -21,28 +41,27 @@
 		.append("div")
 		.attr("class","bar")
 		.style("width", function(d){ return d.mg_dl + "px"})
-		.style("outline","1px solid black")
 		.style("background-color", function(d){
-			
-
-
 			if(d.mg_dl > 300)
 			{
 				//high
 				return "#ff3300";
 			}
-			if(d.mg_dl > 250)
+			if(d.mg_dl > 200)
 			{
 				//moderately high
 				return "#ff9933";
 			}
-
-			if(d.mg_dl < 80)
+			if(d.mg_dl < 60)
+			{
+				// super low
+				return "#0066cc";
+			}
+			if(d.mg_dl < 100)
 			{
 				//low
-				return "#ffff66";
+				return "#00ffff";
 			}
-			
 			return "#ccff99";
 			
 		})
