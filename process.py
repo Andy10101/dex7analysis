@@ -11,6 +11,7 @@ requires pandas ( scipy )
 from lxml import etree
 import json
 import datetime, math
+from CoreUtils import Utils
 
 def getTree(path):
 	tree = etree.parse(path)
@@ -48,6 +49,16 @@ def parseDate(s):
 	ms = int(pBits[1])
 
 	dObj = datetime.datetime( YY,MM,DD,HH,mm,ss,ms)
+	#dateBits = [YY,MM,DD,HH,mm,ss]
+	#print dateBits
+	#print type(dateBits)
+	#dLong = ','.join(dateBits)
+	#print dLong
+	
+	#dLong = "{0}{1}{2}{3}{4}{5}".format(
+	#YY,MM,DD,HH,mm,ss)
+
+	#print dLong
 	return dObj
 
 
@@ -65,7 +76,7 @@ def dexComm7_2csv(nodelist):
 	csvLine = []
 	items = []
 	
-	headerList = ['datestamp','year','weekOfYear','dayOfWeek','hourOfDay','mmol_l','mg_dl']
+	headerList = ['_id','year','weekOfYear','dayOfWeek','hourOfDay','mmol_l','mg_dl']
 	
 	items.append( headerList )
 
@@ -138,6 +149,35 @@ def getDataFrame(inputXML = "./cgm.xml"):
 	from pandas import DataFrame
 	df = DataFrame( data )
 	return df
+
+
+def uploadCouch(numRecords = 8,inputXML = "./cgm.xml",couchHost = "www.agentidea.com:5984"):
+	a,itemz = outCsv( inputXML)
+	sub = itemz[0:numRecords]
+	data, d3data = prepForPanda(sub)
+
+	for elem in d3data:
+
+		tmpJSON = json.dumps( elem )
+		tmpJSON = Utils().pack( tmpJSON)
+
+		url = '''http://www.agentidea.com'''
+
+		path = '''/rest?command=AddJSON&destinationTable=timedata_grantsteinfeld'''
+		path += '''&json64='''
+		path += tmpJSON
+		path += '''&kreds=YWRtaW5fOGMzMTlmMjhkODFkMTUyN2E5NDI4ZTlhNWMyMTk1ZjU%3D'''
+
+
+		import urllib
+		response = urllib.urlopen( url + path)
+		print response
+
+
+
+
+
+
 
 
 def saveD3json(numRecords = 8,inputXML = "./cgm.xml",outputJSON = './d3.json'):

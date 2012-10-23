@@ -1,0 +1,6 @@
+{
+
+	"dayOfWeek": { "map": "function(doc) { emit(doc.dayOfWeek, doc);}"},
+	"hourOfDay": { "map": "function(doc) { emit(doc.hourOfDay, doc);}"}
+
+}
