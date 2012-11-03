@@ -2,12 +2,10 @@
 parses the SensorReadings from dexecom7 sensor export
 designed to run in the iPython Terminal
 %run process.py
-
 requires lxml
 requires pandas ( scipy )
-
-
 """
+
 from lxml import etree
 import json
 import datetime, math
@@ -19,18 +17,16 @@ def getTree(path):
 	sr = root.find("SensorReadings")
 	return sr
 
-
 def prettyPrint(sr):
 	for s in sr:
     		print s.tag
 
-
 def _(key,node):
 	return node.get(key)
 
-def parseDate(s):
+def parseDate(passedDate):
 	'''parse year, month, day, 24hr, min, sec '''
-	dBits = s.split()
+	dBits = passedDate.split()
 	yearBits = dBits[0]
 
 	yBits = yearBits.split('-')
@@ -49,19 +45,8 @@ def parseDate(s):
 	ms = int(pBits[1])
 
 	dObj = datetime.datetime( YY,MM,DD,HH,mm,ss,ms)
-	#dateBits = [YY,MM,DD,HH,mm,ss]
-	#print dateBits
-	#print type(dateBits)
-	#dLong = ','.join(dateBits)
-	#print dLong
-	
-	#dLong = "{0}{1}{2}{3}{4}{5}".format(
-	#YY,MM,DD,HH,mm,ss)
 
-	#print dLong
 	return dObj
-
-
 	
 def mmlToMgDl(i):
 	''' convert mmol/l to mg/dl '''
@@ -76,13 +61,11 @@ def dexComm7_2csv(nodelist):
 	csvLine = []
 	items = []
 	
-	headerList = ['_id','year','weekOfYear','dayOfWeek','hourOfDay','mmol_l','mg_dl']
-	
+	headerList = ['localDateTime','offsetGMT','timezoneDesc','year','weekOfYear','dayOfWeek','hourOfDay','value','units','eventType','owner']
 	items.append( headerList )
-
 	headerLine = ", ".join(headerList)
-
 	csvLine.append( headerLine)
+
 	for node in nodelist:
 		dt = _("DisplayTime",node)
 		tmpDt = parseDate(dt)
@@ -90,12 +73,13 @@ def dexComm7_2csv(nodelist):
 		mv = float(_("Value",node))
 		mgdl = mmlToMgDl( mv )
 
-		csvLine.append( "{0},{1},{2},{3},{4},{5},{6}".format( 
-			dt,isocal[0],isocal[1],isocal[2],tmpDt.hour,mv,mgdl
+		csvLine.append( "{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10}".format( 
+			dt,"-0400","(Eastern Standard Time)",isocal[0],isocal[1],isocal[2],tmpDt.hour,mgdl,"mg_dl","glucose-sensor","GS001"
 			))
 
-		itemList = [dt,isocal[0],isocal[1],isocal[2],tmpDt.hour,mv,mgdl]
+		itemList = [dt,"-0400","(Eastern Standard Time)",isocal[0],isocal[1],isocal[2],tmpDt.hour,mgdl,"mg_dl","glucose-sensor","GS001"]
 		items.append(itemList)
+	
 	return csvLine, items
 
 
@@ -151,7 +135,10 @@ def getDataFrame(inputXML = "./cgm.xml"):
 	return df
 
 
-def uploadCouch(numRecords = 8,inputXML = "./cgm.xml",couchHost = "www.agentidea.com:5984"):
+def uploadCouch(numRecords = 8,
+	inputXML = "./cgm.xml",
+	couchHost = "www.agentidea.com:5984"):
+	''' via python Command, http / json interface '''
 	a,itemz = outCsv( inputXML)
 	sub = itemz[0:numRecords]
 	data, d3data = prepForPanda(sub)
@@ -174,7 +161,38 @@ def uploadCouch(numRecords = 8,inputXML = "./cgm.xml",couchHost = "www.agentidea
 		print response
 
 
+def uploadCouchLocal(numRecords = 8,
+	destinationDB = 'gs001_timedata',
+	inputXML = "./cgm.xml",
+	couchHost = "localhost:5984"):
+	
+	'''a post to couchHost via http directly ... '''
 
+	a,itemz = outCsv( inputXML)
+	sub = itemz[0:numRecords]
+	print sub
+	data, d3data = prepForPanda(sub)
+
+	import httplib
+	url = 'localhost'
+	port = 5984
+	path = '/{0}/'.format(destinationDB)
+
+	
+ 	headers = {"Content-Type": "application/json"}
+
+ 	uri = "http://rhada:pup@{0}:{1}{2}".format( url, port,path)
+ 	print uri
+	for elem in d3data:
+		print elem
+		try:
+			j = json.dumps( elem)
+			c = httplib.HTTPConnection(url, port) 
+			c.request('POST', uri, j	, headers)
+			#c.getresponse()
+			c.close()
+		except:
+			print "err:"
 
 
 
@@ -192,7 +210,9 @@ def saveD3json(numRecords = 8,inputXML = "./cgm.xml",outputJSON = './d3.json'):
 	
 
 def convertXML2CSV(outputCSV = './default.csv',inputXML = "./cgm.xml"):
-	saveCsv( outCsv( inputXML), outputCSV)
+	a,b = outCsv( inputXML)
+
+	saveCsv(a , outputCSV)
 
 def outCsv(inputXML = "./cgm.xml"):
 	tree = getTree(inputXML)
@@ -202,7 +222,7 @@ def saveCsv(csvLines,pathToWrite = './default.csv'):
 	counter = 0
 	with open(pathToWrite,'w+') as f:
 		for line in csvLines:
-			f.write( "{0}\r\n".format(str( line )))
+			f.write( "{0},\r\n".format(str( line )))
 			counter = counter + 1
 
 	print "wrote {0} results to file {1}".format( counter, pathToWrite)
